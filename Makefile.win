@@ -1,0 +1,54 @@
+# Project: Tank
+# Makefile created by Dev-C++ 5.5.3
+
+CPP      = "D:\Program Files (x86)\Dev-Cpp\MinGW64\bin\g++.exe"
+OBJ      = collision.o control.o draw.o main.o message.o rect.o tank.o material.o\
+		   3ds.o ai.o effects.o
+LIBS     = -L"D:\Program Files (x86)\Dev-Cpp\MinGW64\mingw64\lib" \
+		   -static-libgcc -mwindows -lwinmm -lglut64 -lopengl32 -lglu32 -lstb -l3ds
+INCS     = -I "D:\Doc\cpp\include" -I "D:\Program Files (x86)\Dev-Cpp\include"
+BIN      = Tank.exe
+RM       = rm -f
+
+.PHONY: all all-before all-after clean clean-custom
+
+all: all-before $(BIN) all-after
+
+clean: clean-custom
+	${RM} $(OBJ) $(BIN)
+
+$(BIN): $(OBJ)
+	$(CPP) $(OBJ) -o $(BIN) $(LIBS)
+
+collision.o: collision.cpp collision.h
+	$(CPP) -c $< -o $@ $(INCS)
+
+control.o: control.cpp control.h rect.h message.h
+	$(CPP) -c $< -o $@ $(INCS)
+
+draw.o: draw.cpp draw.h effects.h
+	$(CPP) -c $< -o $@ $(INCS)
+
+main.o: main.cpp main.h tank.h collision.h draw.h control.h ai.h effects.h
+	$(CPP) -c $< -o $@ $(INCS)
+
+message.o: message.cpp message.h tank.h effects.h draw.h
+	$(CPP) -c $< -o $@ $(INCS)
+
+rect.o: rect.cpp rect.h
+	$(CPP) -c $< -o $@ $(INCS)
+
+tank.o: tank.cpp tank.h collision.h rect.h message.h effects.h
+	$(CPP) -c $< -o $@ $(INCS)
+
+material.o: material.cpp material.h
+	$(CPP) -c $< -o $@ $(INCS)
+
+3ds.o: 3ds.cpp 3ds.h
+	$(CPP) -c $< -o $@ $(INCS)
+
+ai.o: ai.cpp ai.h control.h tank.h collision.h main.h
+	$(CPP) -c $< -o $@ $(INCS)
+	
+effects.o: effects.cpp effects.h
+	$(CPP) -c $< -o $@ $(INCS)
