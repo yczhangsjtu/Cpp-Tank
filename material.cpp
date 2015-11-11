@@ -1,4 +1,4 @@
-#include <GL\glut.h>
+#include <GL/freeglut.h>
 #include "material.h"
 
 void useMaterial(GLfloat R,GLfloat G,GLfloat B,GLfloat specular,GLfloat shininess)

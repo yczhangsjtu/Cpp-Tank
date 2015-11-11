@@ -1,7 +1,7 @@
 #ifndef _DRAW_H
 #define _DRAW_H
 
-#include "GL\glut.h"
+#include <GL/freeglut.h>
 #include "rect.h"
 #include "tank.h"
 
@@ -12,6 +12,7 @@ const float eyeDist    = 3;
 const float mapRatio   = 0.2;
 const float scaleNear   = 20;
 const float scaleFar    = 2000.0;
+typedef unsigned int UINT;
 
 enum DrawMode {DRAW_MAP, DRAW_INFO, DRAW3D_1, DRAW3D_2};
 

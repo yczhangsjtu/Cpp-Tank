@@ -1,4 +1,5 @@
 #include <cassert>
+#include <cstdio>
 #include "tank.h"
 #include "collision.h"
 #include "rect.h"
@@ -151,7 +152,7 @@ void moveonTank(int idx, int dt)
 
 	if(tanks.at(idx).turning == 1)
 	{
-		nRc.angle  += tankTurnSpeed * dt; // Rotate the new rectangle
+		nRc.angle += tankTurnSpeed * dt; // Rotate the new rectangle
 		if(nRc.angle > 2*M_PI) nRc.angle -= 2*M_PI;
 		tanks.at(idx).tower.angle += tankTurnSpeed * dt;
 		if(tanks.at(idx).tower.angle > 2*M_PI)

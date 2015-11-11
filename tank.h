@@ -51,10 +51,10 @@ const float scaleWidth  = numberWidth * wallSize;
 const float scaleHeight = numberHeight * wallSize;
 const float whRatio     = 1.0;
 // Speeds
-const float tankAccel      = 0.001; // Acceleration of each tank
-const float origBullSpeed  = 1.5; // Original speed of each bullet when created
-const float towerTurnSpeed = 0.0005; // Turning speed of tower
-const float tankTurnSpeed  = 0.0005; // Turning speed of tank body
+const float tankAccel      = 0.0005; // Acceleration of each tank
+const float origBullSpeed  = 0.5; // Original speed of each bullet when created
+const float towerTurnSpeed = 0.0001; // Turning speed of tower
+const float tankTurnSpeed  = 0.0001; // Turning speed of tank body
 const float friction       = 0.006; // Friction of the ground
 
 // Others

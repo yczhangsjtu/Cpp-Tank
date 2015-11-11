@@ -1,4 +1,5 @@
 #include <cmath>
+#include <cstdio>
 #include "rect.h"
 
 // Create a rectangle
@@ -23,7 +24,6 @@ void getVertices(const Rect & rc, float vtc[][2])
 	vtc[2][1] = y - h/2 * cos(a) - w/2 * sin(a);
 	vtc[3][0] = x + w/2 * cos(a) + h/2 * sin(a);
 	vtc[3][1] = y - h/2 * cos(a) + w/2 * sin(a);
-
 }
 
 // Move the rectangle

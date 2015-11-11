@@ -1,9 +1,12 @@
 #include <cassert>
+#include <cstdio>
 #include <iostream>
 #include <cstdlib>
-#include "draw.h"
+#include <cstring>
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb-master/stb_image.h>
 #include "3ds.h"
-#include "stbi.h"
+#include "draw.h"
 #include "material.h"
 #include "effects.h"
 
@@ -25,28 +28,78 @@ extern bool smallMap;
 
 const char *texPath = "tex/";
 
-const char *groundTexFiles[] = {"ground1.jpg"};
-const char *fireTexFiles[] = {"fire.jpg"};
+const char *groundTexFiles[] = {"tex/ground1.jpg"};
+const char *fireTexFiles[] = {"tex/fire.jpg"};
 const char *wallTexFiles[] = {
-	"wall1.jpg", "wall2.jpg",
-	"wall3.jpg", "wall4.jpg"
+	"tex/wall1.jpg", "tex/wall2.jpg",
+	"tex/wall3.jpg", "tex/wall4.jpg"
 };
 
-UINT texBody[MAX_TEXTURES];
-UINT texTower[MAX_TEXTURES];
-UINT texBullet[MAX_TEXTURES];
-UINT texGround[MAX_TEXTURES];
-UINT texWall[MAX_TEXTURES];
-UINT texFire[MAX_TEXTURES];
-CLoad3DS g_Load3ds;
-t3DModel modelBody;
-t3DModel modelTower;
-t3DModel modelBullet;
+Model tankbody, tanktower, bullet;
+
+GLuint groundTex, fireTex, wallTex[4];
+#if 0
+const int groundTextureSize = 512;
+GLubyte groundTexture[groundTextureSize][groundTextureSize][3];
+const int fireTextureSize = 128;
+GLubyte fireTexture[fireTextureSize][fireTextureSize][3];
+const int wallTextureSize = 256;
+GLubyte wallTexture[4][wallTextureSize][wallTextureSize][3];
+#endif
 
 float colorTable[][3] = {{0,0,1},{0,1,1},{1,0,0},{0,1,0},
 						 {1,0,1},{1,1,0},{1,1,1},{0,0,0}};
 float deadColor[][3] = {{0.1,0.1,0.1},{0.5,0.5,0.5}};
 
+void itoa(int i, char *buf)
+{
+	sprintf(buf,"%d",i);
+}
+
+void load_model()
+{
+	tankbody.loadFile(TANK_BODY);
+	tanktower.loadFile(TANK_TOWER);
+	bullet.loadFile(BULLET);
+}
+
+void load_textures()
+{
+	int x,y,n;
+	unsigned char *data = stbi_load(groundTexFiles[0], &x, &y, &n, 0);
+	if(data==NULL)
+	{
+		fprintf(stdout,"Can't load texture file!");
+		exit(1);
+	}
+	glGenTextures(1,&groundTex);
+	glBindTexture(GL_TEXTURE_2D, groundTex);
+	gluBuild2DMipmaps(GL_TEXTURE_2D, 3, x, y, GL_RGB, GL_UNSIGNED_BYTE, data); // genereate MipMap levels for our texture 
+
+	data = stbi_load(fireTexFiles[0], &x, &y, &n, 0);
+	if(data==NULL)
+	{
+		fprintf(stdout,"Can't load texture file!");
+		exit(1);
+	}
+	glGenTextures(1,&fireTex);
+	glBindTexture(GL_TEXTURE_2D, fireTex);
+	gluBuild2DMipmaps(GL_TEXTURE_2D, 3, x, y, GL_RGB, GL_UNSIGNED_BYTE, data); // genereate MipMap levels for our texture 
+
+	for(int k = 0; k < 4; k++)
+	{
+		data = stbi_load(wallTexFiles[k], &x, &y, &n, 0);
+		if(data==NULL)
+		{
+			fprintf(stdout,"Can't load texture file!");
+			exit(1);
+		}
+		glGenTextures(1,&wallTex[k]);
+		glBindTexture(GL_TEXTURE_2D, wallTex[k]);
+		gluBuild2DMipmaps(GL_TEXTURE_2D, 3, x, y, GL_RGB, GL_UNSIGNED_BYTE, data); // genereate MipMap levels for our texture 
+	}
+	glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+}
 
 // Initialize the scene
 void initScene()
@@ -69,18 +122,9 @@ void initScene()
 	glLightfv(GL_LIGHT0, GL_POSITION,light0_pos);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE,light0_dif);
 	glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION,light0_dir);
-	
-	// Load the 3ds models from file
-	g_Load3ds.Import3DS(&modelBody, TANK_BODY);
-	g_Load3ds.Import3DS(&modelTower, TANK_TOWER);
-	g_Load3ds.Import3DS(&modelBullet, BULLET);
-	CreateTextures(texBody,modelBody);
-	CreateTextures(texTower,modelTower);
-	CreateTextures(texBullet,modelBullet);
-	CreateTexture(texGround,groundTexFiles[0],0);
-	CreateTexture(texFire,  fireTexFiles[0],  0);
-	for(int i = 0; i < 4; i++)
-		CreateTexture(texWall,wallTexFiles[i],i);
+
+	load_model();
+	load_textures();
 }
 
 void setModelViewMatrix(DrawMode mode)
@@ -296,12 +340,12 @@ void showBullet()
 {
 	GLfloat color[3] = {1.0,1.0,1.0};
 	char buffer[25] = "BULLET: ";
-	itoa(tanks.at(player1).tower.bullet,buffer+strlen(buffer),10);
+	itoa(tanks.at(player1).tower.bullet,buffer+strlen(buffer));
 	drawString(0,5,5,buffer,color,strlen(buffer));
 	if(nPlayer==2)
 	{
 		buffer[8]='\0';
-		itoa(tanks.at(player2).tower.bullet,buffer+strlen(buffer),10);
+		itoa(tanks.at(player2).tower.bullet,buffer+strlen(buffer));
 		drawString(100,5,5,buffer,color,strlen(buffer));
 	}
 }
@@ -314,13 +358,13 @@ void drawGround()
 	GLfloat v[4][3] = {{0,0,0},{scaleWidth,0,0},
 					   {scaleWidth,scaleHeight,0},
 					   {0,scaleHeight,0}};
-	glColor3f(0,1,0);
-	glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
+	//glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
 	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D,texGround[0]);
+	glBindTexture(GL_TEXTURE_2D,groundTex);
 	useMaterial(1.0,1.0,1.0,1.0,1.0);
 	glNormal3f(0,0,1);
-	glBegin(GL_POLYGON);
+	glColor3f(1,1,1);
+	glBegin(GL_QUADS);
 		glTexCoord2f(0.0,0.0);
 		glVertex3fv(v[0]);
 		glTexCoord2f(0.0,1.0);
@@ -333,14 +377,15 @@ void drawGround()
 	glDisable(GL_TEXTURE_2D);
 }
 
-void drawRect3d(const Rect & rc, float height, int texID)
+void drawRect3d(const Rect & rc, float height, int k)
 {
 	float v[4][2];
 	getVertices(rc,v);
 	if(glIsEnabled(GL_LIGHTING))
 		useMaterial(1.0,1.0,1.0,1.0,1.0);
 	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D,texID);
+
+	glBindTexture(GL_TEXTURE_2D,wallTex[k]);
 	glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
 	glNormal3f(0,0,1);
 	glBegin(GL_POLYGON);
@@ -417,7 +462,7 @@ void drawWall3d(int i, int j)
 	// Set color of the wall based on the value of wall
 	glColor3fv(colorTable[wall[i][j]+3]);
 	if(wall[i][j])
-		drawRect3d(wRc,wallHeight,texWall[wall[i][j]-1]);
+		drawRect3d(wRc,wallHeight,wall[i][j]-1);
 }
 
 // Draw all wall pieces
@@ -461,20 +506,22 @@ void drawTank3d(const Tank & tank, int idx)
 	GLfloat a2 = tank.tower.angle;
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
-	glTranslatef(p[0],p[1],0);
+	glTranslatef(p[0],p[1],0.0);
 	glScalef(0.3,0.3,0.3);
+	glTranslatef(30.0,1.0,0.0);
 	glRotatef(90+a1/M_PI*180,0,0,1);
-	glRotatef(90,1,0,0);
-	render3DModel(modelBody,texBody);
+	glTranslatef(-30.0,-1.0,0.0);
+	tankbody.RenderModel();
 	glPopMatrix();
 	
 	// Draw the tower
 	glPushMatrix();
-	glTranslatef(p[0],p[1],0);
+	glTranslatef(p[0],p[1],0.0);
 	glScalef(0.3,0.3,0.3);
+	glTranslatef(30.0,1.0,0.0);
 	glRotatef(90+a2/M_PI*180,0,0,1);
-	glRotatef(90,1,0,0);
-	render3DModel(modelTower,texTower);
+	glTranslatef(-30.0,-1.0,0.0);
+	tanktower.RenderModel();
 	glPopMatrix();
 }
 
@@ -485,16 +532,16 @@ void drawTanks3d()
 }
 
 // Draw a single bullet
-void drawBullet3d(const Bullet & bullet)
+void drawBullet3d(const Bullet & blt)
 {
-	GLfloat a = bullet.angle;
-	const GLfloat *p= bullet.pos;
+	GLfloat a = blt.angle;
+	const GLfloat *p= blt.pos;
 	glPushMatrix();
 	glTranslatef(p[0],p[1],tankHeight);
 	glScalef(0.05,0.05,0.05);
 	glRotatef(a/M_PI*180,0,0,1);
 	useMaterial(1.0,1.0,1.0,1.0,1.0);
-	render3DModel(modelBullet,texBullet);
+	bullet.RenderModel();
 	glPopMatrix();
 }
 
@@ -526,7 +573,9 @@ void drawEffects()
 			//useMaterial(1.0,0.8,0.0,0.7,0.7);
 			glColor3f(1.0,1.0,1.0);
 			glEnable(GL_TEXTURE_2D);
-			glBindTexture(GL_TEXTURE_2D,texFire[0]);
+
+			glBindTexture(GL_TEXTURE_2D,fireTex);
+
 			//useMaterial(1.0,1.0,1.0,1.0,1.0);
 			for(int k = 0; k < 30; k++)
 			{

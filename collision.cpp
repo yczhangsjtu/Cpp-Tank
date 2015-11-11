@@ -1,4 +1,5 @@
 #include <cmath>
+#include <cstdio>
 #include "collision.h"
 
 #ifndef M_PI

@@ -1,7 +1,7 @@
-#include <windows.h>
-#include <GL\glut.h>
+#include <GL/freeglut.h>
 #include <ctime>
 #include <iostream>
+#include <cstdio>
 
 #include "main.h"
 #include "tank.h"
@@ -89,9 +89,9 @@ void init()
 	addCommandLink('O',player2,towerStop,player2);
 	addCommandLink('h',player2,fire,player2);
 	
-	timer1 = clock();
-	timer2 = clock();
-	timer3 = clock();
+	timer1 = clock()/1000;
+	timer2 = clock()/1000;
+	timer3 = clock()/1000;
 }
 
 void display()
@@ -203,19 +203,19 @@ void passiveMotion(int x, int y)
 void idle()
 {
 	// Count the length of time passed
-	int dt = clock() - timer1;
+	int dt = clock()/1000 - timer1;
 	while(dt > minInterval)
 	{
-		timer1 = clock();
+		timer1 = clock()/1000;
 		// Move on everything
 		moveon(dt);
 		dt -= minInterval;
 	}
 	
-	dt = clock() - timer2;
+	dt = clock()/1000 - timer2;
 	while(dt > aiInterval)
 	{
-		timer2 = clock();
+		timer2 = clock()/1000;
 		if(going)
 			for(int i = nPlayer; i < tanks.size(); i++)
 			{
@@ -234,10 +234,10 @@ void idle()
 		dt -= aiInterval;
 	}
 	
-	dt = clock() - timer3;
+	dt = clock()/1000 - timer3;
 	while(dt > addInterval)
 	{
-		timer3 = clock();
+		timer3 = clock()/1000;
 		if(going)
 		{
 			bool norevive = true;
@@ -272,13 +272,13 @@ void idle()
 	glutPostRedisplay();
 }
 
-int main()
+int main(int argc, char *argv[])
 {
+	glutInit(&argc,argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
 	glutInitWindowSize(500*nPlayer,500);
 	glutInitWindowPosition(0,0);
 	glutCreateWindow("Tank");
-
 	init();
 	glutDisplayFunc(display);
 	glutReshapeFunc(reshape);
