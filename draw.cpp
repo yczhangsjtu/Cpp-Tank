@@ -10,7 +10,8 @@
 #include "material.h"
 #include "effects.h"
 
-#define TANK_BODY  "3ds/tankbody.3ds"
+#define TANK_BODY  "3ds/M1_Abrams.3ds"
+//#define TANK_BODY  "3ds/tankbody.3ds"
 #define TANK_TOWER "3ds/tanktower.3ds"
 #define BULLET     "3ds/bullet.3ds"
 
