@@ -48,6 +48,8 @@ int ww, hh, offsetx, offsety;
 bool smallMap = false;
 bool going    = true;
 
+const int perClock = 10;
+
 ///////////////////////// Basic Functions /////////////////////////////////////
 void init()
 {
@@ -89,9 +91,9 @@ void init()
 	addCommandLink('O',player2,towerStop,player2);
 	addCommandLink('h',player2,fire,player2);
 	
-	timer1 = clock()/1000;
-	timer2 = clock()/1000;
-	timer3 = clock()/1000;
+	timer1 = clock()/perClock;
+	timer2 = clock()/perClock;
+	timer3 = clock()/perClock;
 }
 
 void display()
@@ -203,19 +205,19 @@ void passiveMotion(int x, int y)
 void idle()
 {
 	// Count the length of time passed
-	int dt = clock()/1000 - timer1;
+	int dt = clock()/perClock - timer1;
 	while(dt > minInterval)
 	{
-		timer1 = clock()/1000;
+		timer1 = clock()/perClock;
 		// Move on everything
 		moveon(dt);
 		dt -= minInterval;
 	}
 	
-	dt = clock()/1000 - timer2;
+	dt = clock()/perClock - timer2;
 	while(dt > aiInterval)
 	{
-		timer2 = clock()/1000;
+		timer2 = clock()/perClock;
 		if(going)
 			for(int i = nPlayer; i < tanks.size(); i++)
 			{
@@ -234,10 +236,10 @@ void idle()
 		dt -= aiInterval;
 	}
 	
-	dt = clock()/1000 - timer3;
+	dt = clock()/perClock - timer3;
 	while(dt > addInterval)
 	{
-		timer3 = clock()/1000;
+		timer3 = clock()/perClock;
 		if(going)
 		{
 			bool norevive = true;
